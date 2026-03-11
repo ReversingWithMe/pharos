@@ -177,6 +177,19 @@ possibleVFTable(VFTable) :-
     possibleVFTableWrite(_Insn, Func, _ThisPtr, _Offset1, VFTable),
     (factMethod(Func); factMethod(Entry)).
 
+possibleVFTableFallbackCandidate(VFTable) :-
+    pointerSize(4),
+    noExplicitVFTableWrites,
+    pointerSize(PtrSize),
+    possibleVirtualFunctionCall(_Insn, Caller, _ThisPtr, 0, VFTableOffset),
+    VFTableOffset >= 0,
+    0 is VFTableOffset mod PtrSize,
+    possibleVFTableEntry(VFTable, 0, Entry0),
+    possibleVFTableEntry(VFTable, PtrSize, Entry1),
+    possibleMethod(Entry0),
+    possibleMethod(Entry1),
+    (factMethod(Caller); factMethod(Entry0); factMethod(Entry1)).
+
 guessVFTable(Out) :-
     reportFirstSeen('guessVFTable'),
     % See the commentary at possibleVFTable for how this goal constrains our guesses (and
@@ -186,7 +199,17 @@ guessVFTable(Out) :-
             not(factNOTVFTable(VFTable)),
             doNotGuessHelper(factVFTable(VFTable),
                              factNOTVFTable(VFTable))),
+            VFTableSet),
+    Out = tryBinarySearch(tryVFTable, tryNOTVFTable, VFTableSet).
+
+guessVFTable(Out) :-
+    osetof(VFTable,
+           (possibleVFTableFallbackCandidate(VFTable),
+            not(factNOTVFTable(VFTable)),
+            doNotGuessHelper(factVFTable(VFTable),
+                             factNOTVFTable(VFTable))),
            VFTableSet),
+    logtraceln('Proposing ~Q.', factVFTable_fallback(VFTableSet)),
     Out = tryBinarySearch(tryVFTable, tryNOTVFTable, VFTableSet).
 
 tryOrNOTVFTable(VFTable) :-

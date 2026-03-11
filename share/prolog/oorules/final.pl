@@ -4,7 +4,6 @@
 % ============================================================================================
 
 :- use_module(library(lists), [member/2, min_list/2, max_list/2]).
-
 % Long ago, Ed wrote: A solution is <list of classes, a mapping of classes to methods, a
 % mapping of classes to members, a mapping of each class to its immediate parents and offset, a
 % list of vtables, mapping of vtables to class x offset x size, map of virtual function calls
@@ -338,7 +337,6 @@ finalMember(ClassID, Offset, Sizes, certain) :-
     % As a hack to prevent us from outputting a Class, Offset multiple times, only proceed if
     % EarlySize == Sizes[0]
     UnsortedSizes = [EarlySize|_].
-
 
 % ============================================================================================
 % Final Method Properties
