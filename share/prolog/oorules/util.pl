@@ -6,7 +6,7 @@
 :- use_module(library(lists), [append/3, nth1/4, list_to_set/2]).
 
 longest_suffix(Pred, List, Suffix) :-
-    append(_, Suffix, List),   % generates suffixes longest → shortest
+    append(_, Suffix, List),   % generates suffixes longest to shortest
     call(maplist(Pred), Suffix),
     !.
 
@@ -127,6 +127,18 @@ maplistm2([Elem|Tail], Goal) :-
 bitmask_check(Value, BitMask) :-
     Result is Value /\ BitMask,
     Result == BitMask.
+
+% ============================================================================================
+% Architecture-dependent helpers.
+% ============================================================================================
+
+% Infer pointer size from observed calling conventions.
+% Keep defaults conservative for historical 32-bit workflows.
+:- table pointerSize/1 as opaque.
+pointerSize(8) :-
+    callingConvention(_Address, '__x64call'),
+    !.
+pointerSize(4).
 
 
 % ============================================================================================
